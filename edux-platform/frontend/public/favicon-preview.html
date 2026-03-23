@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EdUx Favicon Preview</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 900px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #6366f1;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .preview-item {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            transition: transform 0.2s;
+        }
+        .preview-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(99, 102, 241, 0.2);
+        }
+        .preview-item img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        .preview-item h3 {
+            color: #333;
+            font-size: 1em;
+            margin-bottom: 5px;
+        }
+        .preview-item p {
+            color: #666;
+            font-size: 0.85em;
+        }
+        .browser-preview {
+            background: #f0f0f0;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 30px 0;
+        }
+        .browser-tab {
+            background: white;
+            border-radius: 8px 8px 0 0;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .browser-tab img {
+            width: 20px;
+            height: 20px;
+        }
+        .browser-tab span {
+            font-size: 14px;
+            color: #333;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+        .feature {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+        }
+        .feature h3 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .feature p {
+            font-size: 0.9em;
+            opacity: 0.95;
+        }
+        .emoji {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .cta {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            background: #f0f9ff;
+            border-radius: 12px;
+            border: 2px dashed #6366f1;
+        }
+        .cta h2 {
+            color: #6366f1;
+            margin-bottom: 15px;
+        }
+        .cta p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            background: #6366f1;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #4f46e5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 EdUx Favicon</h1>
+        <p class="subtitle">Professional education platform branding</p>
+
+        <div class="browser-preview">
+            <div class="browser-tab">
+                <img src="/favicon.svg" alt="EdUx Favicon">
+                <span>EdUx - Smart E-Learning Platform</span>
+            </div>
+        </div>
+
+        <div class="preview-grid">
+            <div class="preview-item">
+                <img src="/favicon.svg" alt="SVG Favicon" style="width: 100px; height: 100px;">
+                <h3>SVG Favicon</h3>
+                <p>Scalable vector format</p>
+            </div>
+            <div class="preview-item">
+                <img src="/favicon.svg" alt="Browser Tab" style="width: 32px; height: 32px;">
+                <h3>Browser Tab</h3>
+                <p>32x32 pixels</p>
+            </div>
+            <div class="preview-item">
+                <img src="/favicon.svg" alt="Mobile Icon" style="width: 80px; height: 80px;">
+                <h3>Mobile Icon</h3>
+                <p>180x180 pixels</p>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="emoji">🎓</div>
+                <h3>Educational Design</h3>
+                <p>Graduation cap symbolizes learning achievement and academic excellence</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">📚</div>
+                <h3>Knowledge Focus</h3>
+                <p>Book element represents study materials and educational content</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">💜</div>
+                <h3>Brand Colors</h3>
+                <p>Purple gradient matches EdUx identity with modern tech appeal</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">✨</div>
+                <h3>Premium Touch</h3>
+                <p>Gold tassel adds excellence and achievement symbolism</p>
+            </div>
+        </div>
+
+        <div class="cta">
+            <h2>Ready to Generate All Formats?</h2>
+            <p>Create PNG and ICO versions for complete browser support</p>
+            <a href="/generate-favicons.html" class="btn">Open Favicon Generator →</a>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #fbbf24;">
+            <h3 style="color: #856404; margin-bottom: 10px;">📋 Quick Checklist</h3>
+            <ul style="color: #856404; padding-left: 20px;">
+                <li>✅ SVG favicon created</li>
+                <li>✅ HTML meta tags added</li>
+                <li>✅ PWA manifest configured</li>
+                <li>✅ Backend handles favicon requests</li>
+                <li>⏳ Generate PNG/ICO files (use generator)</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
