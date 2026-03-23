@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix MongoDB Connection Error</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+        .error-box {
+            background: #fee;
+            border-left: 4px solid #ef4444;
+            padding: 20px;
+            margin: 30px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #991b1b;
+        }
+        .content {
+            padding: 40px;
+        }
+        .step {
+            margin: 30px 0;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 5px solid #6366f1;
+            position: relative;
+        }
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #6366f1;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
+        .step h3 {
+            color: #1f2937;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+        .step p {
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .step code {
+            background: #e5e7eb;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #1f2937;
+        }
+        .button {
+            display: inline-block;
+            background: #6366f1;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 10px 10px 10px 0;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .button:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+        .button.secondary {
+            background: #10b981;
+        }
+        .button.secondary:hover {
+            background: #059669;
+        }
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 30px;
+            border-radius: 8px;
+        }
+        .success-box h3 {
+            color: #065f46;
+            margin-bottom: 10px;
+        }
+        .success-box ul {
+            color: #047857;
+            padding-left: 20px;
+        }
+        .success-box li {
+            margin: 5px 0;
+        }
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 30px;
+            border-radius: 8px;
+        }
+        .warning-box h3 {
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+        .warning-box p {
+            color: #78350f;
+        }
+        .test-section {
+            background: #f0f9ff;
+            padding: 30px;
+            margin: 30px;
+            border-radius: 12px;
+            border: 2px dashed #0ea5e9;
+        }
+        .test-section h3 {
+            color: #0c4a6e;
+            margin-bottom: 15px;
+        }
+        .test-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .test-result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            display: none;
+        }
+        .test-result.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .test-result.error {
+            background: #fee;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .checklist {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .checklist-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .checklist-item:hover {
+            background: #e5e7eb;
+        }
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        .checklist-item.checked {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .progress-bar {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚨 Fix MongoDB Connection Error</h1>
+            <p>Whitelist Vercel IPs in MongoDB Atlas</p>
+        </div>
+
+        <div class="error-box">
+            <strong>Error:</strong> MongooseServerSelectionError: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted.
+        </div>
+
+        <div class="content">
+            <h2 style="color: #1f2937; margin-bottom: 20px;">Follow These Steps:</h2>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+
+            <div class="checklist">
+                <div class="checklist-item" onclick="toggleCheck(this)">
+                    <input type="checkbox" id="check1">
+                    <label for="check1">Read and understand the problem</label>
+                </div>
+                <div class="checklist-item" onclick="toggleCheck(this)">
+                    <input type="checkbox" id="check2">
+                    <label for="check2">Login to MongoDB Atlas</label>
+                </div>
+                <div class="checklist-item" onclick="toggleCheck(this)">
+                    <input type="checkbox" id="check3">
+                    <label for="check3">Navigate to Network Access</label>
+                </div>
+                <div class="checklist-item" onclick="toggleCheck(this)">
+                    <input type="checkbox" id="check4">
+                    <label for="check4">Add IP Address (0.0.0.0/0)</label>
+                </div>
+                <div class="checklist-item" onclick="toggleCheck(this)">
+                    <input type="checkbox" id="check5">
+                    <label for="check5">Confirm and wait 2 minutes</label>
+                </div>
+                <div class="checklist-item" onclick="toggleCheck(this)">
+                    <input type="checkbox" id="check6">
+                    <label for="check6">Test the connection</label>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Login to MongoDB Atlas</h3>
+                <p>Open MongoDB Atlas and login with your credentials:</p>
+                <a href="https://cloud.mongodb.com/" target="_blank" class="button">Open MongoDB Atlas →</a>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Navigate to Network Access</h3>
+                <p>In the left sidebar, under <strong>Security</strong>, click <code>Network Access</code></p>
+                <p>This is where you manage which IP addresses can connect to your database.</p>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Add IP Address</h3>
+                <p>Click the green <code>+ ADD IP ADDRESS</code> button in the top right corner.</p>
+                <p>In the dialog that appears, select <strong>"Allow Access from Anywhere"</strong></p>
+                <p>This will automatically fill in: <code>0.0.0.0/0</code></p>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Confirm Changes</h3>
+                <p>Click the <code>Confirm</code> button to save your changes.</p>
+                <p>You should see a new entry in your IP Access List with status "Active" ✓</p>
+            </div>
+
+            <div class="warning-box">
+                <h3>⏱️ Wait 1-2 Minutes</h3>
+                <p>After adding the IP address, wait 1-2 minutes for the changes to propagate across MongoDB's network. This is normal and required.</p>
+            </div>
+
+            <div class="step">
+                <div class="step-number">5</div>
+                <h3>Test Your Connection</h3>
+                <p>After waiting, test your backend API to verify the fix:</p>
+                
+                <div class="test-section">
+                    <h3>🧪 Test Your Backend</h3>
+                    <p>Enter your backend URL:</p>
+                    <input type="text" 
+                           id="backendUrl" 
+                           class="test-input" 
+                           placeholder="https://edux-backend.vercel.app"
+                           value="https://edux-backend.vercel.app">
+                    <button class="button secondary" onclick="testBackend()">Test Connection</button>
+                    <div id="testResult" class="test-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="success-box">
+            <h3>✅ Success Indicators</h3>
+            <ul>
+                <li>API responds in less than 2 seconds</li>
+                <li>No timeout errors in Vercel logs</li>
+                <li>Login works without errors</li>
+                <li>No "IP not whitelisted" messages</li>
+            </ul>
+        </div>
+
+        <div class="warning-box">
+            <h3>🔒 Is This Secure?</h3>
+            <p><strong>Yes!</strong> While 0.0.0.0/0 allows all IPs, your database still requires username and password authentication. This is the standard practice for serverless deployments like Vercel, which use dynamic IP addresses.</p>
+        </div>
+
+        <div style="padding: 40px; text-align: center; background: #f8f9fa;">
+            <h2 style="color: #1f2937; margin-bottom: 20px;">Need More Help?</h2>
+            <p style="color: #4b5563; margin-bottom: 20px;">Check out these detailed guides:</p>
+            <a href="./FIX_MONGODB_NOW.md" class="button">Quick Fix Guide</a>
+            <a href="./MONGODB_WHITELIST_STEPS.md" class="button">Visual Step-by-Step</a>
+            <a href="./MONGODB_ATLAS_FIX.md" class="button">Comprehensive Guide</a>
+        </div>
+    </div>
+
+    <script>
+        function toggleCheck(element) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                element.classList.add('checked');
+            } else {
+                element.classList.remove('checked');
+            }
+            
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+            const checked = document.querySelectorAll('.checklist-item input[type="checkbox"]:checked').length;
+            const total = checkboxes.length;
+            const percentage = (checked / total) * 100;
+            
+            document.getElementById('progressBar').style.width = percentage + '%';
+        }
+
+        async function testBackend() {
+            const url = document.getElementById('backendUrl').value;
+            const resultDiv = document.getElementById('testResult');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'test-result';
+            resultDiv.textContent = 'Testing connection...';
+            
+            try {
+                const response = await fetch(url + '/api/test');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'test-result success';
+                    resultDiv.textContent = '✅ SUCCESS! Backend is working!\n\n' + JSON.stringify(data, null, 2);
+                } else {
+                    resultDiv.className = 'test-result error';
+                    resultDiv.textContent = '❌ Error: ' + response.status + '\n\n' + JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.textContent = '❌ Connection failed: ' + error.message + '\n\nMake sure:\n1. URL is correct\n2. Backend is deployed\n3. You waited 2 minutes after whitelisting IPs';
+            }
+        }
+
+        // Initialize progress
+        updateProgress();
+    </script>
+</body>
+</html>

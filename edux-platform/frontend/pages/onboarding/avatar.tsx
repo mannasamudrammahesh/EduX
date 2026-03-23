@@ -8,33 +8,43 @@ import { Avatar, UserRole } from '@/types';
 import Button from '@/components/ui/Button';
 
 const STUDENT_AVATARS: Avatar[] = [
-  { id: 'student-1',  name: 'Curious',    url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=curious&backgroundColor=b6e3f4' },
-  { id: 'student-2',  name: 'Explorer',   url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=explorer&backgroundColor=bae1ff' },
-  { id: 'student-3',  name: 'Achiever',   url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=achiever&backgroundColor=ffd93d' },
-  { id: 'student-4',  name: 'Creative',   url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=creative&backgroundColor=c0aede' },
-  { id: 'student-5',  name: 'Friendly',   url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=friendly&backgroundColor=6bcf7f' },
-  { id: 'student-6',  name: 'Tech',       url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=tech&backgroundColor=4d4d4d' },
-  { id: 'student-7',  name: 'Artistic',   url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=artistic&backgroundColor=ffb3ba' },
-  { id: 'student-8',  name: 'Innovator',  url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=innovator&backgroundColor=baffc9' },
-  { id: 'student-9',  name: 'Designer',   url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=designer&backgroundColor=ffc9de' },
-  { id: 'student-10', name: 'Developer',  url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=developer&backgroundColor=c9ffc9' },
-  { id: 'student-11', name: 'Analyst',    url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=analyst&backgroundColor=ffd1dc' },
-  { id: 'student-12', name: 'Researcher', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=researcher&backgroundColor=97ffff' },
+  // Lorelei Style - Modern Cartoon (3 Male, 3 Female) - Now Top Row
+  { id: 'student-1',  name: 'Scholar',    url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=LeoMale&backgroundColor=bae1ff' },
+  { id: 'student-2',  name: 'Innovator',  url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=MaxMale&backgroundColor=baffc9' },
+  { id: 'student-3',  name: 'Explorer',   url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=NoahMale&backgroundColor=ffffba' },
+  { id: 'student-4',  name: 'Achiever',   url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=OliviaFemale&backgroundColor=ffc9de' },
+  { id: 'student-5',  name: 'Creative',   url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=AvaFemale&backgroundColor=ffd1dc' },
+  { id: 'student-6',  name: 'Visionary',  url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=IsabellaFemale&backgroundColor=e6e6fa' },
+  
+  // Adventurer Style - Fun & Friendly (3 Male, 3 Female) - Now Bottom Row
+  { id: 'student-7',  name: 'Curious',    url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=AlexMale&backgroundColor=b6e3f4' },
+  { id: 'student-8',  name: 'Bright',     url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=JordanMale&backgroundColor=ffd93d' },
+  { id: 'student-9',  name: 'Thinker',    url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=SamMale&backgroundColor=6bcf7f' },
+  { id: 'student-10', name: 'Brilliant',  url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=EmmaFemale&backgroundColor=ffb3ba' },
+  { id: 'student-11', name: 'Genius',     url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=SophiaFemale&backgroundColor=c0aede' },
+  { id: 'student-12', name: 'Prodigy',    url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=MiaFemale&backgroundColor=97ffff' },
 ];
 
 const EDUCATOR_AVATARS: Avatar[] = [
-  { id: 'educator-1',  name: 'Professor',   url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=professor&backgroundColor=b6e3f4' },
-  { id: 'educator-2',  name: 'Mentor',      url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=mentor&backgroundColor=ffdfba' },
-  { id: 'educator-3',  name: 'Academic',    url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=academic&backgroundColor=6bcf7f' },
-  { id: 'educator-4',  name: 'Leader',      url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=leader&backgroundColor=ffffba' },
-  { id: 'educator-5',  name: 'Strategist',  url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=strategist&backgroundColor=e6e6fa' },
-  { id: 'educator-6',  name: 'Scholar',     url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=scholar&backgroundColor=c0aede' },
-  { id: 'educator-7',  name: 'Coach',       url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=coach&backgroundColor=bae1ff' },
-  { id: 'educator-8',  name: 'Expert',      url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=expert&backgroundColor=ffd93d' },
-  { id: 'educator-9',  name: 'Guide',       url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=guide&backgroundColor=baffc9' },
-  { id: 'educator-10', name: 'Instructor',  url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=instructor&backgroundColor=ffb3ba' },
-  { id: 'educator-11', name: 'Trainer',     url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=trainer&backgroundColor=97ffff' },
-  { id: 'educator-12', name: 'Facilitator', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=facilitator&backgroundColor=ffc9de' },
+  // Lorelei Style - Professional Males (with facial hair variety) - Top Row
+  { id: 'educator-1',  name: 'Professor',    url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=ProfessorRobert&backgroundColor=bae1ff&facialHair=beard' },
+  { id: 'educator-2',  name: 'Mentor',       url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=ProfessorDaniel&backgroundColor=baffc9&facialHair=mustache' },
+  { id: 'educator-3',  name: 'Instructor',   url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=TeacherThomas&backgroundColor=ffffba' },
+  { id: 'educator-4',  name: 'Director',     url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=DirectorWilliam&backgroundColor=ffc9de&facialHair=beard' },
+  
+  // Lorelei Style - Professional Females - Top Row
+  { id: 'educator-5',  name: 'Guide',        url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=ProfessorLisa&backgroundColor=ffd1dc' },
+  { id: 'educator-6',  name: 'Facilitator',  url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=TeacherAmanda&backgroundColor=e6e6fa' },
+  
+  // Notionists Style - Professional Males (more mature look) - Bottom Row
+  { id: 'educator-7',  name: 'Scholar',      url: 'https://api.dicebear.com/7.x/notionists/svg?seed=ProfessionalScholar&backgroundColor=b6e3f4' },
+  { id: 'educator-8',  name: 'Expert',       url: 'https://api.dicebear.com/7.x/notionists/svg?seed=ExpertDavid&backgroundColor=6bcf7f' },
+  { id: 'educator-9',  name: 'Coach',        url: 'https://api.dicebear.com/7.x/notionists/svg?seed=CoachMichael&backgroundColor=ffd93d' },
+  
+  // Notionists Style - Professional Females (more mature look) - Bottom Row
+  { id: 'educator-10', name: 'Tutor',        url: 'https://api.dicebear.com/7.x/notionists/svg?seed=TutorSarah&backgroundColor=ffb3ba' },
+  { id: 'educator-11', name: 'Trainer',      url: 'https://api.dicebear.com/7.x/notionists/svg?seed=TrainerEmily&backgroundColor=c0aede' },
+  { id: 'educator-12', name: 'Leader',       url: 'https://api.dicebear.com/7.x/notionists/svg?seed=LeaderRachel&backgroundColor=97ffff' },
 ];
 
 export default function AvatarSelection() {
