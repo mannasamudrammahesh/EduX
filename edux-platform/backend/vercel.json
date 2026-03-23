@@ -3,10 +3,17 @@
   "builds": [
     {
       "src": "server.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 30
+      }
     }
   ],
   "routes": [
+    {
+      "src": "/favicon.(ico|png)",
+      "dest": "server.js"
+    },
     {
       "src": "/(.*)",
       "dest": "server.js"
@@ -14,5 +21,11 @@
   ],
   "env": {
     "NODE_ENV": "production"
+  },
+  "functions": {
+    "server.js": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
   }
 }

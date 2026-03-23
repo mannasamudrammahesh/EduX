@@ -89,6 +89,15 @@ app.get('/', (req, res) => {
   });
 });
 
+// Favicon handler - prevent 404 errors
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end();
+});
+
+app.get('/favicon.png', (req, res) => {
+  res.status(204).end();
+});
+
 // Test endpoint
 app.get('/api/test', (req, res) => {
   res.json({ message: 'Backend is working!', timestamp: new Date().toISOString() });
@@ -116,30 +125,59 @@ io.on('connection', (socket) => {
 });
 
 // MongoDB connection with proper timeout settings for Vercel
-if (process.env.NODE_ENV !== 'production') {
-  console.log('Attempting to connect to MongoDB...');
+// Use cached connection for serverless to avoid cold start issues
+let cachedDb = null;
+
+async function connectToDatabase() {
+  if (cachedDb && mongoose.connection.readyState === 1) {
+    return cachedDb;
+  }
+
+  const mongooseOptions = {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    maxPoolSize: 10,
+    minPoolSize: 2,
+    retryWrites: true,
+    retryReads: true,
+  };
+
+  try {
+    if (mongoose.connection.readyState === 0) {
+      await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/edux_platform', mongooseOptions);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('MongoDB connected successfully');
+      }
+    }
+    cachedDb = mongoose.connection;
+    return cachedDb;
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    throw err;
+  }
 }
 
-const mongooseOptions = {
-  serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
-  socketTimeoutMS: 45000, // Socket timeout
-  maxPoolSize: 10, // Connection pool size
-  minPoolSize: 2,
-};
-
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/edux_platform', mongooseOptions)
-  .then(() => {
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('MongoDB connected successfully');
-    }
-  })
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
-    // Don't exit in serverless environment
-    if (process.env.NODE_ENV !== 'production') {
-      process.exit(1);
-    }
+// Initialize connection for non-serverless environments
+if (process.env.NODE_ENV !== 'production') {
+  connectToDatabase().catch(err => {
+    console.error('Failed to connect to MongoDB:', err);
+    process.exit(1);
   });
+}
+
+// Middleware to ensure DB connection on each request (for serverless)
+app.use(async (req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (err) {
+    console.error('Database connection failed:', err);
+    res.status(503).json({ 
+      message: 'Database connection unavailable. Please check MongoDB Atlas IP whitelist settings.',
+      error: process.env.NODE_ENV !== 'production' ? err.message : undefined
+    });
+  }
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
