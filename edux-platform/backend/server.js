@@ -124,7 +124,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// MongoDB connection with proper timeout settings for Vercel
+// MongoDB connection with proper timeout settings for Vercel and Atlas
 // Use cached connection for serverless to avoid cold start issues
 let cachedDb = null;
 
@@ -136,23 +136,47 @@ async function connectToDatabase() {
   const mongooseOptions = {
     serverSelectionTimeoutMS: 30000,
     socketTimeoutMS: 45000,
+    connectTimeoutMS: 30000,
     maxPoolSize: 10,
     minPoolSize: 2,
     retryWrites: true,
     retryReads: true,
+    // Optimize for Atlas
+    maxIdleTimeMS: 10000,
+    compressors: 'zlib',
+    // Better error handling
+    autoIndex: process.env.NODE_ENV !== 'production',
   };
 
   try {
     if (mongoose.connection.readyState === 0) {
-      await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/edux_platform', mongooseOptions);
+      const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/edux_platform';
+      await mongoose.connect(uri, mongooseOptions);
+      
       if (process.env.NODE_ENV !== 'production') {
         console.log('MongoDB connected successfully');
+        console.log('Database:', mongoose.connection.name);
       }
+      
+      // Set up connection event handlers
+      mongoose.connection.on('error', (err) => {
+        console.error('MongoDB connection error:', err);
+      });
+      
+      mongoose.connection.on('disconnected', () => {
+        console.log('MongoDB disconnected');
+        cachedDb = null;
+      });
+      
+      mongoose.connection.on('reconnected', () => {
+        console.log('MongoDB reconnected');
+      });
     }
     cachedDb = mongoose.connection;
     return cachedDb;
   } catch (err) {
     console.error('MongoDB connection error:', err);
+    cachedDb = null;
     throw err;
   }
 }
@@ -172,8 +196,27 @@ app.use(async (req, res, next) => {
     next();
   } catch (err) {
     console.error('Database connection failed:', err);
+    
+    // Provide helpful error messages
+    let errorMessage = 'Database connection unavailable.';
+    let hints = [];
+    
+    if (err.message.includes('ENOTFOUND') || err.message.includes('getaddrinfo')) {
+      hints.push('Check your MongoDB Atlas connection string');
+      hints.push('Verify your cluster is running');
+    } else if (err.message.includes('authentication failed')) {
+      hints.push('Check your database username and password');
+    } else if (err.message.includes('IP') || err.message.includes('whitelist')) {
+      hints.push('Add 0.0.0.0/0 to MongoDB Atlas IP whitelist for Vercel');
+      hints.push('Or add your current IP address');
+    } else if (err.message.includes('timeout')) {
+      hints.push('Check your network connection');
+      hints.push('Verify MongoDB Atlas cluster is accessible');
+    }
+    
     res.status(503).json({ 
-      message: 'Database connection unavailable. Please check MongoDB Atlas IP whitelist settings.',
+      message: errorMessage,
+      hints: hints.length > 0 ? hints : undefined,
       error: process.env.NODE_ENV !== 'production' ? err.message : undefined
     });
   }

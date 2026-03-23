@@ -18,7 +18,8 @@ router.get('/', auth, async (req, res) => {
       .populate('sender', 'name avatar')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .skip((page - 1) * limit)
+      .lean(); // Use lean for better performance
 
     const total = await Notification.countDocuments(query);
     const unreadCount = await Notification.countDocuments({
@@ -37,8 +38,8 @@ router.get('/', auth, async (req, res) => {
       unreadCount
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error fetching notifications:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

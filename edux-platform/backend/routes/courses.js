@@ -99,26 +99,34 @@ router.get('/certificates', auth, async (req, res) => {
 // Get user's enrolled courses with progress (MUST be before /:id route)
 router.get('/my-courses', auth, async (req, res) => {
   try {
+    console.log('Fetching enrolled courses for user:', req.user._id);
+    
     const enrollments = await Enrollment.find({ userId: req.user._id })
       .populate('courseId', 'title description thumbnail instructor instructorName category level totalDuration')
       .sort({ enrolledAt: -1 });
 
-    const coursesWithProgress = enrollments.map(enrollment => ({
-      ...enrollment.courseId.toObject(),
-      enrollment: {
-        progress: enrollment.progress,
-        lastWatchedTime: enrollment.lastWatchedTime,
-        completed: enrollment.completed,
-        enrolledAt: enrollment.enrolledAt,
-        completedAt: enrollment.completedAt,
-        totalWatchTime: enrollment.totalWatchTime
-      }
-    }));
+    console.log('Found enrollments:', enrollments.length);
 
+    // Filter out enrollments with null/deleted courses
+    const coursesWithProgress = enrollments
+      .filter(enrollment => enrollment.courseId != null)
+      .map(enrollment => ({
+        ...enrollment.courseId.toObject(),
+        enrollment: {
+          progress: enrollment.progress,
+          lastWatchedTime: enrollment.lastWatchedTime,
+          completed: enrollment.completed,
+          enrolledAt: enrollment.enrolledAt,
+          completedAt: enrollment.completedAt,
+          totalWatchTime: enrollment.totalWatchTime
+        }
+      }));
+
+    console.log('Returning courses:', coursesWithProgress.length);
     res.json(coursesWithProgress);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error in my-courses:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
@@ -291,8 +299,11 @@ router.post('/', auth, requireOnboardingComplete, requireRole(['EDUCATOR']), [
 ], async (req, res) => {
   try {
     console.log('=== BACKEND: Creating course ===');
+    console.log('User ID:', req.user._id);
+    console.log('User Name:', req.user.name);
+    console.log('User Role:', req.user.role);
+    console.log('User Onboarded:', req.user.isOnboarded);
     console.log('Request body:', JSON.stringify(req.body, null, 2));
-    console.log('User:', req.user.name, req.user._id);
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
