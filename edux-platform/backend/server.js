@@ -22,7 +22,8 @@ app.use(cors({
   origin: [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    process.env.CLIENT_URL || "http://localhost:3000"
+    process.env.CLIENT_URL || "http://localhost:3000",
+    /https:\/\/.*\.vercel\.app$/  // Allow all Vercel preview deployments
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -68,6 +69,21 @@ app.use('/api/progress', require('./routes/progress'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/quiz', require('./routes/quiz'));
 app.use('/api/reviews', require('./routes/reviews'));
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'EdUx Platform API',
+    status: 'Running',
+    version: '1.0.0',
+    endpoints: {
+      test: '/api/test',
+      auth: '/api/auth',
+      courses: '/api/courses',
+      users: '/api/users'
+    }
+  });
+});
 
 // Test endpoint
 app.get('/api/test', (req, res) => {
