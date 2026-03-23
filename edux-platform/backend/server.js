@@ -8,6 +8,10 @@ const { Server } = require('socket.io');
 require('dotenv').config();
 
 const app = express();
+
+// Trust proxy - MUST be set before other middleware for Vercel
+app.set('trust proxy', 1);
+
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
@@ -111,11 +115,19 @@ io.on('connection', (socket) => {
   });
 });
 
-// MongoDB connection
+// MongoDB connection with proper timeout settings for Vercel
 if (process.env.NODE_ENV !== 'production') {
   console.log('Attempting to connect to MongoDB...');
 }
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/edux_platform')
+
+const mongooseOptions = {
+  serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
+  socketTimeoutMS: 45000, // Socket timeout
+  maxPoolSize: 10, // Connection pool size
+  minPoolSize: 2,
+};
+
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/edux_platform', mongooseOptions)
   .then(() => {
     if (process.env.NODE_ENV !== 'production') {
       console.log('MongoDB connected successfully');
@@ -123,7 +135,10 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/edux_plat
   })
   .catch(err => {
     console.error('MongoDB connection error:', err);
-    process.exit(1);
+    // Don't exit in serverless environment
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
   });
 
 // Error handling middleware
@@ -140,3 +155,6 @@ server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   }
 });
+
+// Export for Vercel serverless
+module.exports = app;
