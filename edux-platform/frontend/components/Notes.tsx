@@ -67,8 +67,14 @@ export default function Notes() {
     ['notes', searchTerm, selectedCategory],
     () => notesAPI.getNotes({ 
       search: searchTerm || undefined,
-      category: selectedCategory !== 'All' ? selectedCategory : undefined
-    })
+      category: selectedCategory !== 'All' ? selectedCategory : undefined,
+      limit: 20 // Limit initial load
+    }),
+    {
+      staleTime: 30000, // Cache for 30 seconds
+      cacheTime: 300000, // Keep in cache for 5 minutes
+      refetchOnWindowFocus: false, // Don't refetch on window focus
+    }
   );
 
   // Create note mutation
@@ -99,9 +105,43 @@ export default function Notes() {
     }
   });
 
-  // Like note mutation
+  // Like note mutation with optimistic updates
   const likeNoteMutation = useMutation(notesAPI.likeNote, {
-    onSuccess: () => {
+    onMutate: async (noteId) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries('notes');
+      
+      // Snapshot previous value
+      const previousNotes = queryClient.getQueryData(['notes', searchTerm, selectedCategory]);
+      
+      // Optimistically update
+      queryClient.setQueryData(['notes', searchTerm, selectedCategory], (old: any) => {
+        if (!old?.notes) return old;
+        return {
+          ...old,
+          notes: old.notes.map((note: Note) => {
+            if (note._id === noteId) {
+              const isLiked = note.likes.includes(user?.id || '');
+              return {
+                ...note,
+                likes: isLiked 
+                  ? note.likes.filter(id => id !== user?.id)
+                  : [...note.likes, user?.id]
+              };
+            }
+            return note;
+          })
+        };
+      });
+      
+      return { previousNotes };
+    },
+    onError: (err, noteId, context: any) => {
+      // Rollback on error
+      queryClient.setQueryData(['notes', searchTerm, selectedCategory], context.previousNotes);
+    },
+    onSettled: () => {
+      // Refetch after mutation
       queryClient.invalidateQueries('notes');
     }
   });

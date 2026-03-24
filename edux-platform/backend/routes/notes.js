@@ -178,13 +178,20 @@ router.delete('/:id', auth, async (req, res) => {
 // Like/Unlike note
 router.post('/:id/like', auth, async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: 'Invalid note ID format' });
+    }
+
     const note = await Note.findById(req.params.id);
 
     if (!note) {
       return res.status(404).json({ message: 'Note not found' });
     }
 
-    const likeIndex = note.likes.indexOf(req.user._id);
+    // Convert ObjectIds to strings for comparison
+    const userIdString = req.user._id.toString();
+    const likeIndex = note.likes.findIndex(id => id.toString() === userIdString);
 
     if (likeIndex > -1) {
       // Unlike
@@ -196,13 +203,16 @@ router.post('/:id/like', auth, async (req, res) => {
 
     await note.save();
 
+    // Check if user liked after save
+    const isLiked = note.likes.some(id => id.toString() === userIdString);
+
     res.json({
       likes: note.likes.length,
-      isLiked: note.likes.includes(req.user._id)
+      isLiked: isLiked
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error liking note:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

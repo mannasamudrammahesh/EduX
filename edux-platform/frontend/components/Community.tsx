@@ -25,7 +25,16 @@ export default function Community() {
 
   const { data: postsData, isLoading } = useQuery(
     ['community-posts', searchTerm, selectedCategory],
-    () => communityAPI.getPosts({ search: searchTerm, category: selectedCategory !== 'All' ? selectedCategory : undefined })
+    () => communityAPI.getPosts({ 
+      search: searchTerm || undefined, 
+      category: selectedCategory !== 'All' ? selectedCategory : undefined,
+      limit: 20 // Limit initial load
+    }),
+    {
+      staleTime: 30000, // Cache for 30 seconds
+      cacheTime: 300000, // Keep in cache for 5 minutes
+      refetchOnWindowFocus: false, // Don't refetch on window focus
+    }
   ) as { data: { posts: Post[] } | undefined, isLoading: boolean };
 
   const createPostMutation = useMutation(communityAPI.createPost, {
@@ -40,8 +49,41 @@ export default function Community() {
   });
 
   const likePostMutation = useMutation(communityAPI.likePost, {
-    onSuccess: () => queryClient.invalidateQueries('community-posts'),
-    onError: () => toast.error('Failed to like post')
+    onMutate: async (postId) => {
+      // Optimistic update
+      await queryClient.cancelQueries('community-posts');
+      const previousPosts = queryClient.getQueryData('community-posts');
+      
+      queryClient.setQueryData(['community-posts', searchTerm, selectedCategory], (old: any) => {
+        if (!old?.posts) return old;
+        return {
+          ...old,
+          posts: old.posts.map((post: Post) => {
+            if ((post._id || post.id) === postId) {
+              const isLiked = post.isLiked;
+              return {
+                ...post,
+                isLiked: !isLiked,
+                likes: isLiked 
+                  ? post.likes.filter((id: string) => id !== user?.id)
+                  : [...post.likes, user?.id]
+              };
+            }
+            return post;
+          })
+        };
+      });
+      
+      return { previousPosts };
+    },
+    onError: (err, postId, context: any) => {
+      // Rollback on error
+      queryClient.setQueryData(['community-posts', searchTerm, selectedCategory], context.previousPosts);
+      toast.error('Failed to like post');
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries('community-posts');
+    }
   });
 
   const addCommentMutation = useMutation(communityAPI.addComment, {

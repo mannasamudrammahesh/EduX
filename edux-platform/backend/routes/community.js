@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
   try {
     const { 
       page = 1, 
-      limit = 10, 
+      limit = 20, // Reduced default limit for better performance
       category, 
       sortBy = 'createdAt',
       sortOrder = 'desc',
@@ -45,44 +45,39 @@ router.get('/', async (req, res) => {
       sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
     }
 
+    // Optimized query with lean() for better performance
     const posts = await Post.find(query)
       .populate('author', 'name avatar role')
       .populate('comments.author', 'name avatar role')
-      .populate('likes', 'name avatar')
+      .select('-__v') // Exclude version key
       .sort(sortOptions)
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit))
+      .lean(); // Convert to plain JavaScript objects for better performance
 
     const total = await Post.countDocuments(query);
-
-    // Get categories and tags for filtering
-    const categories = await Post.distinct('category');
-    const tags = await Post.distinct('tags');
 
     // Add user interaction status if authenticated
     let postsWithUserStatus = posts;
     if (req.user) {
-      postsWithUserStatus = posts.map(post => {
-        const postObj = post.toObject();
-        postObj.isLiked = post.likes.some(like => like._id.toString() === req.user._id.toString());
-        postObj.isAuthor = post.author._id.toString() === req.user._id.toString();
-        return postObj;
-      });
+      const userIdString = req.user._id.toString();
+      postsWithUserStatus = posts.map(post => ({
+        ...post,
+        isLiked: post.likes.some(like => like.toString() === userIdString),
+        isAuthor: post.author._id.toString() === userIdString,
+        likes: post.likes.map(id => id.toString()) // Convert ObjectIds to strings
+      }));
     }
 
     res.json({
       posts: postsWithUserStatus,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(total / parseInt(limit)),
       currentPage: parseInt(page),
-      total,
-      filters: {
-        categories,
-        tags: tags.flat().filter((tag, index, arr) => arr.indexOf(tag) === index)
-      }
+      total
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error fetching posts:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
@@ -187,13 +182,20 @@ router.put('/:id', auth, [
 // Like/Unlike post
 router.post('/:id/like', auth, async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: 'Invalid post ID format' });
+    }
+
     const post = await Post.findById(req.params.id);
 
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    const likeIndex = post.likes.indexOf(req.user._id);
+    // Convert ObjectIds to strings for comparison
+    const userIdString = req.user._id.toString();
+    const likeIndex = post.likes.findIndex(id => id.toString() === userIdString);
     let action = '';
 
     if (likeIndex > -1) {
@@ -206,8 +208,10 @@ router.post('/:id/like', auth, async (req, res) => {
       action = 'liked';
       
       // Award points to post author (but not self-likes)
-      if (post.author.toString() !== req.user._id.toString()) {
-        await User.findByIdAndUpdate(post.author, { $inc: { points: 2 } });
+      if (post.author.toString() !== userIdString) {
+        await User.findByIdAndUpdate(post.author, { $inc: { points: 2 } }).catch(err => {
+          console.error('Error awarding points:', err);
+        });
       }
     }
 
@@ -219,8 +223,8 @@ router.post('/:id/like', auth, async (req, res) => {
       isLiked: action === 'liked'
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error liking post:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
@@ -288,7 +292,9 @@ router.post('/:postId/comment/:commentId/like', auth, async (req, res) => {
       return res.status(404).json({ message: 'Comment not found' });
     }
 
-    const likeIndex = comment.likes.indexOf(req.user._id);
+    // Convert ObjectIds to strings for comparison
+    const userIdString = req.user._id.toString();
+    const likeIndex = comment.likes.findIndex(id => id.toString() === userIdString);
     let action = '';
 
     if (likeIndex > -1) {
@@ -301,7 +307,7 @@ router.post('/:postId/comment/:commentId/like', auth, async (req, res) => {
       action = 'liked';
       
       // Award points to comment author
-      if (comment.author.toString() !== req.user._id.toString()) {
+      if (comment.author.toString() !== userIdString) {
         await User.findByIdAndUpdate(comment.author, { $inc: { points: 1 } });
       }
     }
@@ -314,8 +320,8 @@ router.post('/:postId/comment/:commentId/like', auth, async (req, res) => {
       isLiked: action === 'liked'
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error liking comment:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

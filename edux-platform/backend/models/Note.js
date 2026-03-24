@@ -4,7 +4,8 @@ const noteSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    index: true // Add index for searches
   },
   content: {
     type: String,
@@ -13,16 +14,22 @@ const noteSchema = new mongoose.Schema({
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+    index: true // Add index for author queries
   },
   isPublic: {
     type: Boolean,
-    default: false
+    default: false,
+    index: true // Add index for public/private filtering
   },
-  tags: [String],
+  tags: {
+    type: [String],
+    index: true // Add index for tag searches
+  },
   category: {
     type: String,
-    default: 'General'
+    default: 'General',
+    index: true // Add index for category filtering
   },
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -39,5 +46,10 @@ const noteSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Compound indexes for common queries
+noteSchema.index({ isPublic: 1, createdAt: -1 });
+noteSchema.index({ author: 1, createdAt: -1 });
+noteSchema.index({ category: 1, isPublic: 1 });
 
 module.exports = mongoose.model('Note', noteSchema);

@@ -24,7 +24,8 @@ const postSchema = new mongoose.Schema({
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+    index: true // Add index for faster queries
   },
   content: {
     type: String,
@@ -44,13 +45,21 @@ const postSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  tags: [String],
+  tags: {
+    type: [String],
+    index: true // Add index for tag searches
+  },
   category: {
     type: String,
-    default: 'General'
+    default: 'General',
+    index: true // Add index for category filtering
   }
 }, {
   timestamps: true
 });
+
+// Compound index for common queries
+postSchema.index({ createdAt: -1, category: 1 });
+postSchema.index({ author: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Post', postSchema);
